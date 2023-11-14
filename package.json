@@ -1,0 +1,28 @@
+{
+  "name": "automate-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/node": "^20.9.0",
+    "@vitest/ui": "^0.34.6",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2",
+    "vitest": "^0.34.6",
+    "webdriverio": "^8.22.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "sharp": "^0.32.6",
+    "tesseract.js": "^5.0.3"
+  }
+}

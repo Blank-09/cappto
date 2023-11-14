@@ -1,0 +1,19 @@
+{
+  "extends": "@tsconfig/node18/tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "outDir": "dist",
+    "target": "ES6",
+    "baseUrl": "./src",
+    "types": [
+      "node"
+    ],
+    "moduleResolution": "node"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,16 @@
+node_modules
+.ignore
+.env
+
+# Trained Data
+eng.traineddata
+
+# Editor Config
+.vscode
+
+# Auto generated files/folders
+tests/data
+src/screenshots
+captchas.json
+data.json
+send
