@@ -2,15 +2,15 @@ node_modules
 .ignore
 .env
 
-# Trained Data
-eng.traineddata
-
 # Editor Config
 .vscode
 
 # Auto generated files/folders
+dist
 tests/data
+tests/output
 src/screenshots
+eng.traineddata
 captchas.json
 data.json
 send

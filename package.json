@@ -1,12 +1,16 @@
 {
   "name": "cappto",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cappto is a simple CLI tool to automatically fill captcha forms in Android app.",
   "main": "./dist/index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts",
+    "dev": "concurrently --raw --kill-others npm:start-appium npm:start-automate",
+    "dev:server": "ts-node-dev --respawn src/index.ts",
+    "test:dev": "vitest dev --ui",
+    "start-automate": "npm run wait-for-appium && npm run dev:server",
     "start": "node dist/index.js",
-    "test": "vitest",
+    "start-appium": "appium --allow-cors",
+    "wait-for-appium": "node ./src/utils/waitForAppium",
     "build": "tsc"
   },
   "author": "blank-09",
@@ -15,6 +19,7 @@
     "@tsconfig/node18": "^18.2.2",
     "@types/node": "^20.9.0",
     "@vitest/ui": "^0.34.6",
+    "concurrently": "^8.2.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6",

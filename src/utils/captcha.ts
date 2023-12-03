@@ -13,14 +13,19 @@ async function fillCaptcha(driver: WebdriverIO.Browser, captcha: string) {
   await submitButton.click()
 }
 
+async function openVideo(driver: WebdriverIO.Browser) {
+  const videoItem = await driver.$('~Video')
+  const isVideoItemExists = await videoItem.isExisting()
+
+  if (isVideoItemExists) {
+    await videoItem.click()
+    await sleep(15 * 1000)
+  }
+}
+
 //
 
 async function openAds(driver: WebdriverIO.Browser) {
-  let menubar = await driver.$('//android.widget.Image[@text="menuImage"]')
-
-  await menubar.click()
-  await sleep(1000)
-
   let adsMenuItem = await driver.$('~Advertisement')
   await adsMenuItem.click()
 }
@@ -48,4 +53,4 @@ async function detectCaptcha(driver: WebdriverIO.Browser): Promise<Boolean> {
   )
 }
 
-export { openAds, fillCaptcha, detectCaptcha }
+export { openAds, openVideo, fillCaptcha, detectCaptcha }

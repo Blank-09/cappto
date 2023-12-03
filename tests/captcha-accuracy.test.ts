@@ -1,14 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 
-import { expect, it, describe, test } from 'vitest'
-import { validateCaptcha } from './captcha'
-import { copyCaptchaFiles } from './copy'
+import { expect, it, describe, afterAll } from 'vitest'
+import { validateCaptcha, waitUntilReady } from '../src/utils/captcha/captcha-sharp'
 
-// import data from './data.json'
+import captchaData from './data.json'
 
 //
-const TEST_DATA_FOLDER = path.join(__dirname, './data')
+const TEST_DATA_FOLDER = path.join(__dirname, 'data')
+const TEST_OUTPUT_FOLDER = path.join(__dirname, 'output')
 
 type CaptchaType = {
   img: string
@@ -17,32 +17,18 @@ type CaptchaType = {
   isValid?: boolean
 }
 
-describe('Captcha validation', () => {
-  // Copy captchas to ./tests/data
-  // it('should copy captchas at ./tests/data', () => {
-  //   const noOfFiles = copyCaptchaFiles(TEST_DATA_FOLDER)
-  //   expect(fs.readdirSync(TEST_DATA_FOLDER).length).toBe(noOfFiles)
-  // })
+describe('Captcha validation', async () => {
+  await waitUntilReady()
 
-  it(
-    'should create captchas.json',
-    async () => {
-      const captchas = fs.readdirSync(TEST_DATA_FOLDER)
-      const data: Omit<CaptchaType, 'receivedText'>[] = []
-
-      console.log(data)
-      for (var i = 72; i < captchas.length; i++) {
-        console.log(i)
-        const text = await validateCaptcha(path.join(TEST_DATA_FOLDER, captchas[i]))
-        data.push({ img: captchas[i], text: text })
-      }
-
-      console.log(data)
-      fs.writeFileSync(path.join(__dirname, 'captchas.json'), JSON.stringify(data, null, 2))
-      expect(true).toBe(true)
-    },
-    300 * 1000
-  )
+  // var i = 0
+  for (const captcha of captchaData) {
+    // i++
+    // if (i > 10) break
+    it(`should validate ${captcha.img}`, async () => {
+      const text = await validateCaptcha(path.join(TEST_DATA_FOLDER, captcha.img), TEST_OUTPUT_FOLDER)
+      expect(text).toBe(captcha.text)
+    })
+  }
 
   // it(
   //   'should validate captchas',
@@ -66,3 +52,22 @@ describe('Captcha validation', () => {
   //   120 * 1000
   // )
 })
+
+// it(
+//   'should create captchas.json',
+//   async () => {
+//     const captchas = fs.readdirSync(TEST_DATA_FOLDER)
+//     const data: Omit<CaptchaType, 'receivedText'>[] = []
+
+//     for (var i = 138; i < captchas.length; i++) {
+//       console.log(i)
+//       const text = await validateCaptcha(path.join(TEST_DATA_FOLDER, captchas[i]))
+//       data.push({ img: captchas[i], text: text })
+//     }
+
+//     console.log(data)
+//     fs.writeFileSync(path.join(__dirname, 'captchas.json'), JSON.stringify(data, null, 2))
+//     expect(true).toBe(true)
+//   },
+//   300 * 1000
+// )

@@ -14,4 +14,8 @@ function moveCaptchaFileTo(fileName: string, isValid: boolean) {
   fs.renameSync(oldPath, newPath)
 }
 
-export { moveCaptchaFileTo }
+function createImageFileName(n: number) {
+  return `captcha-${n.toString().padStart(4, '0')}.png`
+}
+
+export { moveCaptchaFileTo, createImageFileName }

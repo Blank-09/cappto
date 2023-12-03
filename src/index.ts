@@ -1,27 +1,30 @@
-import { remote } from 'webdriverio'
+// Configure dotenv
 import { configDotenv } from 'dotenv'
+configDotenv()
+
+//
+import { remote } from 'webdriverio'
 import { wdOptions } from './config/capabilities'
 
-import { detectCaptcha, fillCaptcha, openAds } from './utils/captcha'
-import { log, moveCaptchaFileTo, sleep } from './utils'
+import { detectCaptcha, fillCaptcha, openAds, openVideo } from './utils/captcha'
+import { createImageFileName, log, moveCaptchaFileTo, sleep } from './utils'
 
 import fs from 'fs'
 import path from 'path'
 import login from './utils/login'
 
-import { getCaptchaText, getTextFromScreen, waitForTextOnScreen } from './tools/text-recognizer'
+import { getTextFromScreen, waitForTextOnScreen } from './tools/text-recognizer'
 import { CAPTCHA_INVALID_FOLDER, CAPTCHA_TEST_FOLDER, CAPTCHA_VALID_FOLDER } from './constants'
 import { validateCaptcha } from '../tests/captcha'
-
-// Configure dotenv
-configDotenv()
 
 const username = process.env.MYV3ADS_USERNAME ?? ''
 const password = process.env.MYV3ADS_PASSWORD ?? ''
 
+let driver: WebdriverIO.Browser
+
 // Run the test
 async function runTest() {
-  const driver = await remote(wdOptions)
+  driver = await remote(wdOptions)
   const status = await driver.status()
 
   if (status.ready) {
@@ -46,11 +49,14 @@ async function runTest() {
 
     let menubar = await driver.$('//android.widget.Image[@text="menuImage"]')
 
-    const prevFile = `captcha-${(noOfFiles - 1).toString().padStart(4, '0')}.png`
+    const prevFile = createImageFileName(noOfFiles - 1)
     const prevfileScrshot = path.join(CAPTCHA_TEST_FOLDER, prevFile)
     const isMenubarExists = await menubar.isExisting()
 
     if (isMenubarExists) {
+      await menubar.click()
+      await sleep(1000)
+      await openVideo(driver)
       await openAds(driver)
     }
 
@@ -62,32 +68,20 @@ async function runTest() {
     console.log('Captcha--', await detectCaptcha(driver))
     await sleep(2000)
 
-    const filename = `captcha-${noOfFiles.toString().padStart(4, '0')}.png`
+    const filename = createImageFileName(noOfFiles)
     const captchaScrshotFile = path.join(CAPTCHA_TEST_FOLDER, filename)
     const captchaContainer = await driver.$('//android.view.View[@resource-id="captcha-sec"]')
 
     await captchaContainer.saveScreenshot(captchaScrshotFile)
-
-    // const captcha = await getCaptchaText(captchaScrshotFile)
     const captcha = await validateCaptcha(captchaScrshotFile)
     await fillCaptcha(driver, captcha)
 
+    await sleep(500)
     const screen = await getTextFromScreen(driver)
     console.log(screen)
 
-    // const text = await getCaptchaText('./src/screenshots/screen.png', false, {
-    //   top: 245,
-    //   left: 150,
-    //   width: 420,
-    //   height: 80
-    // })
-
-    // if (text === 'Invalid Captcha') {
-    //   moveCaptchaFileTo(filename, false)
-    // }
-
     if (screen.includes('Today earning reached')) {
-      // return
+      return
     }
 
     await captchaLoop(noOfFiles + 1)
@@ -99,4 +93,25 @@ async function runTest() {
   await driver.deleteSession()
 }
 
-runTest().catch((e) => log(e))
+runTest().catch((e) => {
+  log(e)
+  process.exit(0)
+})
+
+// process.on('SIGINT', () => {
+//   console.log('Force Stopping...')
+//   process.exit(0)
+// })
+
+// process.on('SIGTERM', () => {
+//   console.log('Received SIGTERM signal. Cleaning up...')
+//   process.exit(0)
+// })
+
+// process.on('uncaughtException', () => {
+//   console.log('Error: index.ts -> uncaughtException')
+// })
+
+// process.on('exit', () => {
+//   driver.deleteSession()
+// })
