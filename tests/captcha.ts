@@ -1,14 +1,30 @@
-import { PSM, createWorker } from 'tesseract.js'
+import Tesseract, { PSM, createWorker } from 'tesseract.js'
 import { basename } from 'path'
 
 import sharp from 'sharp'
 
-//
-export async function validateCaptcha(path: string) {
-  const croppedImage = await cropImage(path)
-  const res = await recognize(croppedImage)
-  return res.data.text.trim()
+let worker: Tesseract.Worker
+;(async () => {
+  worker = await createWorker('eng', 2)
+  worker.setParameters({
+    tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyz'
+  })
+})()
+
+export async function waitUntilReady() {
+  return new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (worker) {
+        clearInterval(interval)
+        resolve(true)
+      }
+    }, 100)
+  })
 }
+
+// function recognize(buffer: Buffer) {
+//   return worker.recognize(buffer)
+// }
 
 async function cropImage(path: string, outputAsFile?: boolean) {
   const image = sharp(path) //
@@ -25,21 +41,17 @@ async function cropImage(path: string, outputAsFile?: boolean) {
   return image.toBuffer()
 }
 
-async function recognize(buffer: Buffer) {
-  const worker = await createWorker('eng', 2)
-  worker.setParameters({
-    tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyz',
-    tessedit_pageseg_mode: PSM.SINGLE_WORD
-    // tessjs_create_box: '1'
-  })
-
-  // console.log('Recognizing captcha...')
-
-  const ret = await worker.recognize(buffer)
-  await worker.terminate()
-
-  return ret
+//
+export async function validateCaptcha(path: string) {
+  const croppedImage = await cropImage(path)
+  const res = await worker.recognize(croppedImage)
+  return res.data.text.trim()
 }
+
+process.on('exit', async () => {
+  if (process.env.TEST === 'true') return
+  await worker.terminate()
+})
 
 // o - 0 - o0
 // 1 - l - i
